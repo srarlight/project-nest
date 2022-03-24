@@ -1,16 +1,23 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { HttpExceptionFilter } from './core/filter/http-exception.filter';
+import { HttpExceptionsFilter } from './core/filter/http-exception.filter';
 import { TransformInterceptor } from './core/interceptor/transform.interceptor';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   //全局url前缀
   app.setGlobalPrefix('api');
-  // 注册全局错误的过滤器
-  app.useGlobalFilters(new HttpExceptionFilter());
+  //  全局注册校验管道
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+    }),
+  );
   // 全局注册拦截器
   app.useGlobalInterceptors(new TransformInterceptor());
+  // 注册全局错误的过滤器
+  app.useGlobalFilters(new HttpExceptionsFilter());
   // 设置swagger文档
   const options = new DocumentBuilder()
     .setTitle('Cats example')

@@ -8,6 +8,7 @@ export interface postEntity {
   tinyint:number
   createdAt: string;
   updatedAt:string
+  [x:string | number]:string | number
 }
 export interface postResult {
   list:postEntity[]
