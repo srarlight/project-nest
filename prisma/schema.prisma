@@ -11,12 +11,56 @@ datasource db {
 }
 
 model Post {
- id Int @id @default(autoincrement())
- author String @db.VarChar(50)
- title String @db.VarChar(50)
- content String @db.VarChar(50)
- thumb_url String 
- tinyint Int 
- createdAt DateTime @default(now())
- updatedAt DateTime @updatedAt 
+  id          Int        @id @default(autoincrement())
+  title       String     @db.VarChar(50)
+  content     String     @db.MediumText //内容
+  contentHtml String     @db.MediumText 
+  summary     String     @db.Text
+  coverUrl    String     @map("cover_url") @db.VarChar(256)
+  count       Int        @default(0) ///阅读量
+  likeCount   Int        @default(0) @map("like_count") //点赞量
+  isRecommend Int        @default(0) @map("is_recommend") ///推荐显示
+  status      PostStatus @default(publish)
+  publishTime DateTime ?  @map("publish_time")
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  author     User ?      @relation(fields: [userId], references: [id]) //一对一关系
+  categories  Category?   @relation(fields: [categoryId], references: [id])
+  userId      String   ?  
+  categoryId Int ?
+}
+
+//分类
+model Category {
+  id   Int    @id @default(autoincrement())
+  Post Post[] 
+}
+enum PostStatus {
+  draft
+  publish
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Status {
+  active
+  disabled
+}
+
+model User {
+  id        String   @id @default(uuid())
+  userName  String   @unique @db.VarChar(50) // 用户名
+  nickName  String   @db.VarChar(50) //昵称
+  password  String   @db.VarChar(256) //密码
+  avatar    String //头像
+  email     String   @unique //邮箱  
+  status    String   @default("active")
+  openid    String   @db.VarChar(256)
+  role      String   @default("user")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Post      Post[]
 }

@@ -23,8 +23,9 @@ export class PostService {
     if (doc.length > 0) {
       throw new HttpException('文章已存在', 401);
     }
+    console.log(data,'data')
     return await this.prisma.post.create({
-      data,
+      data
     });
   }
   async getCount(data:any){

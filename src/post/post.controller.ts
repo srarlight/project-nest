@@ -7,19 +7,26 @@ import {
   Query,
   Param,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { postEntity, postResult } from 'src/api/post.dto';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { createPostDto, findPostDto } from 'src/dto/createPost.dto';
 import {
   PaginationHelper,
-  PaginationRequestDto,
   PaginationResponseDto,
 } from 'src/helper/pagination.helper';
+// import { Public } from 'src/auth/white-auth.guard';
+import { Roles, RolesGuard } from 'src/auth/role.guard';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Public } from 'src/auth/white-auth.guard';
 
 @ApiTags('文章')
+@ApiBearerAuth() // swagger文档设置token
 @Controller('post')
+@Roles('admin')
+@UseGuards(JwtAuthGuard,RolesGuard)
 export class PostController {
   constructor(private readonly postService: PostService) {}
   /**
@@ -27,9 +34,10 @@ export class PostController {
    * @param post
    * @returns
    */
+  @Public()
   @ApiOperation({ summary: '创建文章' })
   @Post()
-  create(@Body() post: createPostDto): Promise<postResult> {
+  create(@Body() post: createPostDto): Promise<any> {
     return this.postService.create(post);
   }
   /**
@@ -69,7 +77,7 @@ export class PostController {
   @Put(':id')
   async update(
     @Param('id', new ParseIntPipe()) id: number,
-    @Body() post: postEntity,
+    @Body() post: createPostDto,
   ) {
     return await this.postService.updateById(id, post);
   }
